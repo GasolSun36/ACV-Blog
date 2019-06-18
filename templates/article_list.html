@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+{% block title %}
+    首页
+{% endblock %}
+
+<div class="body">
+    {% block body %}
+
+        <style>
+            .body {
+                margin: 0 auto;
+
+            }
+        </style>
+    {% endblock %}
+</div>
+{#在{% block main %}的这个标签外面加一层<div class="main"></div>然后修改.main的css样式即可#}
+<div class="main">
+    {% block main %}
+        <div class="row">
+            <form method="get" action="{% url 'article:article_search' %}" style="width:750px;">
+                {% csrf_token %}
+                <div class="input-group">
+                    <div class="control">
+                        <input style="width: 180px;" type="search" name="search" class="form-control"
+                               placeholder="搜索博客(标题或内容)">
+                        <button class="btn btn-default" type="submit">搜索</button>
+                    </div>
+                    <div class="btn-info">
+                        <a href="{% url 'article:article_post' %}">
+                            <button  class="btn btn-info" type="button">写博客</button>
+                        </a>
+                    </div>
+
+                </div><!-- /input-group -->
+
+            </form>
+
+        </div><!-- /.row -->
+        <ul class="question-list-group">
+            {% for article in articles %}
+                <li>
+                    <div class="question-group">
+                        <p class="question-title">
+                            <a href="{% url 'article:article_detail' article.id %}">{{ article.title }}</a>
+                        </p>
+                        <p class="question-content">{{ article.content }}</p>
+                        <div class="question-info">
+                            <span class="question-author">
+                                博主：<a
+                                    href="{% url 'users:others_info' article.author.id %}">{{ article.author.username }}</a>
+                            </span>
+                            <span class="question-time">创作时间：{{ article.created }}</span>
+                            <span>
+                                <small class="col align-self-end" style="color: gray;">
+                                    浏览: {{ article.total_views }}
+                                </small>
+                            </span>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        <div>
+            <h1 style="text-align: center">最热文章排行榜</h1>
+            {% for article_view in articles_views %}
+                {% if article_view.total_views != 0 %}
+
+                    <div class="question-group">
+                        <p class="question-title">
+                            <a href="{% url 'article:article_detail' article_view.id %}">{{ article_view.title }}</a>
+                        </p>
+                        <p class="question-content">{{ article_view.content }}</p>
+                        <div class="question-info">
+                            <span class="question-author">
+                                博主：<a
+                                    href="{% url 'users:others_info' article_view.author.id %}">{{ article_view.author.username }}</a>
+                            </span>
+                            <span class="question-time">创作时间：{{ article_view.created }}</span>
+                            <span>
+                                <small class="col align-self-end" style="color: gray;">
+                                    浏览: {{ article_view.total_views }}
+                                </small>
+                            </span>
+                        </div>
+                    </div>
+
+
+                {% endif %}
+            {% empty %}
+                还没有人访问过博客！
+            {% endfor %}
+        </div>
+
+        <style>
+            ul {
+                list-style: none;
+                padding-left: 0;
+            }
+
+            ul li {
+                border-bottom: 1px solid #eee;
+                overflow: hidden;
+                /*padding: 15px 0;*/
+            }
+
+            .main {
+                background: #fff;
+                width: 750px;
+                margin: 0 auto;
+                overflow: hidden;
+                padding: 10px;
+            }
+
+            .question-group {
+                float: left;
+                width: 660px;
+                margin-left: 10px;
+            }
+
+            .question-title a {
+                color: #259;
+                font-weight: 900;
+            }
+
+            .question-info {
+                text-align: right;
+            }
+
+            .question-author {
+                margin-right: 20px;
+            }
+
+
+            .control {
+                margin-left: 20px;
+                width: 260px;
+                float: left;
+            }
+
+            .btn-info {
+                float: right;
+            }
+
+            .input-group {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        </style>
+    {% endblock %}
+</div>

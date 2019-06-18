@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% endblock %}
+{% block title %}
+    搜索结果
+{% endblock %}
+<div class="main">
+
+    {% block main %}
+        <div class="row">
+            <form method="get" action="{% url 'question:question_mysearch' %}" style="width:750px;">
+                {% csrf_token %}
+                <div class="input-group">
+                    <div class="control">
+                        <input style="width: 180px;" type="search" name="search" class="form-control"
+                               placeholder="从我的问答中搜索(标题或内容)">
+                        <button class="btn btn-default" type="submit">搜索</button>
+                    </div>
+                    <div class="btn-info">
+                        <a href="{% url 'question:question_post' %}">
+                            <button class="btn btn-info" type="button">写问答</button>
+                        </a>
+                    </div>
+
+                </div><!-- /input-group -->
+
+            </form>
+
+        </div><!-- /.row -->
+        <style>
+
+
+            .row {
+                width: 750px;
+            }
+
+
+            .control {
+                margin-left: 20px;
+                width: 260px;
+                float: left;
+            }
+
+            .btn-info {
+                float: right;
+            }
+
+            .input-group {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        </style>
+        <ul class="question-list-group">
+            {% for question in questions %}
+                <li>
+                    <div class="question-group">
+                        <p class="question-title">
+                            <a href="{% url 'question:question_detail' question.id %}">{{ question.title }}</a>
+                        </p>
+                        <p class="question-content">{{ question.content }}</p>
+                        <div class="question-info">
+                            <span class="question-time">提问时间：{{ question.created }}</span>
+                        </div>
+                    </div>
+                </li>
+            {% empty %}
+                <div class="question-group">
+                    没有找到符合搜索要求的问答！
+                </div>
+            {% endfor %}
+        </ul>
+
+        <style>
+            ul {
+                list-style: none;
+                padding-left: 0;
+            }
+
+            ul li {
+                border-bottom: 1px solid #eee;
+                overflow: hidden;
+                /*padding: 15px 0;*/
+            }
+
+            .main {
+                background: #fff;
+                width: 750px;
+                margin: 0 auto;
+                overflow: hidden;
+                padding: 10px;
+            }
+
+            .question-group {
+                float: left;
+                width: 660px;
+                margin-left: 10px;
+            }
+
+            .question-title a {
+                color: #259;
+                font-weight: 900;
+            }
+
+            .question-info {
+                text-align: right;
+            }
+
+            .question-author {
+                margin-right: 20px;
+            }
+        </style>
+    {% endblock %}
+</div>

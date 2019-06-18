@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}文章详情{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+<div class="main">
+    {% block main %}
+        {% with total_likes=article.users_like.count users_like=article.users_like.all %}
+            <h3 class="page-title">{{ question.title }}</h3>
+            <p class="question-info">
+                <span class="span">提问者:
+                    {% if question.author.photo %}
+                        <a href="{% url 'users:others_info' question.author.id %}">
+                        <img src="{{ question.author.photo | striptags }}" class="img-circle" id="my_photo" width="20px"
+                             name="user_face">
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:others_info' question.author.id %}">
+                        <img name="user_face" src="{% static 'images/user.jpg' %}" class="img-circle" id="my_photo"
+                             width="20px">
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'users:others_info' question.author.id %}">{{ question.author.username }}</a>
+                </span>
+                <span>提问时间:{{ question.created }}</span>
+                <span>赏金:{{ question.integral }}积分</span>
+                {% if question.author.username != user.username %}
+                    {% if a.exists %}
+                        <a href="#" onclick="confirm_collect_cancel()">取消收藏</a>
+                    {% else %}
+                        <a href="#" onclick="confirm_collect()">收藏问答</a>
+                    {% endif %}
+                {% endif %}
+                {% if question.author.username == user.username %}
+                    <a href="#" onclick="confirm_delete()">删除问答</a>
+                {% endif %}
+                {% if question.author.username == user.username %}
+                    <a href="{% url 'question:question_change' question.id %}">修改问答</a>
+                {% endif %}
+            </p>
+
+
+            <link rel="stylesheet" href="{% static 'editor/css/editormd.preview.css' %}"/>
+            <div id='editormd-view'>
+        <textarea id="append-test" style="display:none;" class="question-content">
+{{ question.content }}
+        </textarea>
+            </div>
+            <br>
+            <hr>
+            <h3><span class="glyphicon glyphicon-bullhorn"></span>本文有
+                {{ question.answers.count }}
+                条回答
+            </h3>
+
+            {% for answer in question.answers.all %}
+                <div>
+                    <p><strong>
+                        {% if answer.answertor.photo %}
+                            <a href="{% url 'users:others_info' answer.answertor.id %}">
+                                <img src="{{ answer.answertor.photo | striptags }}" class="img-circle" id="my_photo"
+                                     width="20px"
+                                     name="user_face">
+                            </a>
+                        {% else %}
+                            <a href="{% url 'users:others_info' answer.answertor.id %}">
+                                <img name="user_face" src="{% static 'images/user.jpg' %}" class="img-circle"
+                                     id="my_photo"
+                                     width="20px">
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'users:others_info' answer.answertor.id %}">{{ answer.answertor }}</a>
+                    </strong>回答:</p>
+                    <p style="margin-left:40px;">{{ answer.content }}</p>
+                    <a href="{% url 'question:answer_report' answer.id %}" style="color:#BBBBBB;float:right">举报</a>
+            {% empty %}
+                <div class="question-group">
+                    还没有回答哦，快来回答问题吧！
+                </div>
+            {% endfor %}
+            <hr>
+            <form action="." method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <textarea type="text" name="content" class="form-control" placeholder="请填写你的回答"></textarea>
+                </div>
+                <input type="hidden" name="article_id" value="{{ question.id }}">
+                <div class="form-group" style="text-align: right">
+                    <button class="btn btn-primary">立即回答</button>
+                </div>
+            </form>
+            <a href="#" onclick="report_question()">举报</a>
+            </div>
+
+
+            <script src='{% static "js/jquery-1.11.1.min.js" %}'></script>
+            <script src='{% static "editor/lib/marked.min.js" %}'></script>
+            <script src='{% static "editor/lib/prettify.min.js" %}'></script>
+            <script src='{% static "editor/lib/raphael.min.js" %}'></script>
+            <script src='{% static "editor/lib/underscore.min.js" %}'></script>
+            <script src='{% static "editor/lib/sequence-diagram.min.js" %}'></script>
+            <script src='{% static "editor/lib/flowchart.min.js" %}'></script>
+            <script src='{% static "editor/lib/jquery.flowchart.min.js" %}'></script>
+            <script src='{% static "editor/editormd.js" %}'></script>
+            <script type="text/javascript" src="{% static 'js/layer.js' %}"></script>
+            <script type="text/javascript">
+                $(function () {
+                    editormd.markdownToHTML("editormd-view", {
+                        htmlDecode: "style, script, iframe",
+                        emoji: true,
+                        taskList: true,
+                        tex: true,
+                        flowChart: true,
+                        sequenceDiagram: true,
+                    });
+                });
+
+            </script>
+
+
+            <script>
+                // 删除文章的函数
+                function confirm_delete() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "确认删除",
+                        // 正文
+                        content: "确认删除这篇问答吗？",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "question:question_delete" question.id %}'
+                        },
+                    })
+                }
+            </script>
+            <script>
+                // 收藏文章的函数
+                function confirm_collect() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "确认收藏",
+                        // 正文
+                        content: "确认收藏这篇问答吗？",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "question:question_collect" question.id %}'
+                        },
+                    })
+                }
+            </script>
+            <script>
+                // 收藏文章的函数
+                function confirm_collect_cancel() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "取消收藏",
+                        // 正文
+                        content: "确认取消收藏这篇问答吗？",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "question:question_collect_cancel" question.id %}'
+                        },
+                    })
+                }
+            </script>
+            <script>
+                // 举报博客的函数
+                function report_question() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "举报问答",
+                        // 正文
+                        content: "确认举报这篇问答吗？举报属实会有奖励，但举报若不属实则会有惩罚",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "question:question_report" question.id %}'
+                        },
+                    })
+                }
+            </script>
+            <style>
+                .main {
+                    background: #fff;
+                    width: 750px;
+                    margin: 0 auto;
+                    overflow: hidden;
+                    padding: 10px;
+                }
+
+                .page-title {
+                    text-align: center;
+                    font-weight: 800;
+                }
+
+                .question-info {
+                    text-align: center;
+                    margin-top: 20px;
+
+                }
+
+                .question-content {
+                    margin-left: 10px;
+                }
+
+                .span {
+                    margin-right: 10px;
+                }
+
+                .form-control {
+                    width: 650px;
+
+                }
+
+                .form-group {
+                    margin-left: 10px;
+                }
+
+                .font-control {
+                    margin-left: 10px;
+                }
+
+                .form-group {
+                    margin-right: 48px;
+                }
+
+                .line-control {
+                    line-height: 300%;
+                }
+
+                .answer-list li {
+                    list-style: none;
+                    border-bottom: 1px solid #eee;
+                    padding-top: 10px;
+                }
+
+                .answer-list {
+                    padding-left: 0;
+                }
+
+                .user-info {
+                    font-size: 16px;
+                    color: #9b9b9b;
+                    line-height: 40px;
+                }
+
+                .user-info .username {
+                    margin-left: 20px;
+                }
+
+                .user-info .create-time {
+                    float: right;
+                }
+
+                .answer-content {
+                    margin-left: 60px;
+                    font-size: 20px;
+                }
+            </style>
+        {% endwith %}
+    {% endblock %}
+</div>

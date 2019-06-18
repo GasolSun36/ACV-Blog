@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}用户信息{% endblock %}
+{% load staticfiles %}
+{% block head %}
+
+{% endblock %}
+{% block body %}
+
+{% endblock %}
+<div class="main">
+    {% block main %}
+        <div class="col-md-2">
+            <div class="bg-info">
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'article:article_othersblog' user.id %}">TA的博客</a></p>
+                </div>
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'question:question_othersquestion' user.id %}">TA的问答</a></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10">
+            <div class="row text-center vertical-middle-sm">
+                <h1 style="text-align: center;">博主信息</h1>
+                {#                如果user.fan_user中包含当前用户即USER，则显示取消关注，否则显示关注博主#}
+                {#                {% if f.follow == user and f.fan == follow %}#}
+                {#                    <a href="#" onclick="follow_cancel()">取消关注</a>#}
+                {#                {% else %}#}
+                {#                    <a href="#" onclick="follow_on()">关注博主</a>#}
+                {#                {% endif %}#}
+                {% if f.count != 0 %}
+                    <a href="#" onclick="follow_cancel()">取消关注</a>
+                {% else %}
+                    <a href="#" onclick="follow_on()">关注博主</a>
+                {% endif %}
+
+
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>昵称:</span></div>
+                            <div class="col-md-7 text-left">{{ user.nickname }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>毕业学校:</span></div>
+                            <div class="col-md-7 text-left">{{ user.school }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>职业:</span></div>
+                            <div class="col-md-7 text-left">{{ user.profession }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>地址:</span></div>
+                            <div class="col-md-7 text-left">{{ user.address }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>个人介绍:</span></div>
+                            <div class="col-md-7 text-left">{{ user.aboutme }}</div>
+                        </div>
+                    </div>
+                    <div style="margin-right:100px">
+
+                        {% if user.photo %}
+                            <img src="{{ user.photo | striptags }}" class="img-circle" id="my_photo" width="120px"
+                                 name="user_face">
+                        {% else %}
+                            <img name="user_face" src="{% static 'images/user.jpg' %}" class="img-circle" id="my_photo"
+                                 width="120px">
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src='{% static "js/jquery-1.11.1.min.js" %}'></script>
+        <script type="text/javascript" src="{% static 'js/layer.js' %}"></script>
+        <script>
+            // 关注博主的函数
+            function follow_on() {
+                // 调用layer弹窗组件
+                layer.open({
+                    // 弹窗标题
+                    title: "关注",
+                    // 正文
+                    content: "确定要关注这个博主吗？",
+                    // 点击确定按钮后调用的回调函数
+                    yes: function (index, layero) {
+                        // 指定应当前往的 url
+                        location.href = '{% url "users:follow_on" user.id  %}'
+                    },
+                })
+            }
+        </script>
+        <script>
+            // 取消关注博主的函数
+            function follow_cancel() {
+                // 调用layer弹窗组件
+                layer.open({
+                    // 弹窗标题
+                    title: "取消关注",
+                    // 正文
+                    content: "确定要取消关注这个博主吗？",
+                    // 点击确定按钮后调用的回调函数
+                    yes: function (index, layero) {
+                        // 指定应当前往的 url
+                        location.href = '{% url "users:follow_cancel" user.id  %}'
+                    },
+                    cancel: function () {
+                        //右上角关闭回调
+                    }
+                })
+            }
+        </script>
+        <style>
+            .main {
+                background: #fff;
+                width: 750px;
+                margin: 0 auto;
+                overflow: hidden;
+                padding: 10px;
+            }
+        </style>
+
+    {% endblock %}
+
+</div>
+

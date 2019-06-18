@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}用户信息{% endblock %}
+{% load staticfiles %}
+{% block body %}
+
+{% endblock %}
+<div class="main">
+    {% block main %}
+        <div class="col-md-2">
+            <div class="bg-info">
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'article:article_myblog' %}">我的博客</a></p>
+                </div>
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'question:question_myquestion' %}">我的问答</a></p>
+                </div>
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'users:user_follow' %}">我的关注</a></p>
+                </div>
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'users:user_fan' %}">我的粉丝</a></p>
+                </div>
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'users:my_collect' %}">我的收藏</a></p>
+                </div>
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'password_change' %}">修改密码</a></p>
+                </div>
+                <div class="text-center" style="margin-top: 5px;">
+                    <p><a href="{% url 'users:user_info_edit' %}">修改个人信息</a></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10">
+            <div class="row text-center vertical-middle-sm">
+                <h1 style="text-align: center;">我的信息</h1>
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>用户名:</span></div>
+                            <div class="col-md-7 text-left">{{ user.username }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>邮箱:</span></div>
+                            <div class="col-md-7 text-left">{{ user.email }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>毕业学校:</span></div>
+                            <div class="col-md-7 text-left">{{ user.school }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>昵称:</span></div>
+                            <div class="col-md-7 text-left">{{ user.nickname }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>职业:</span></div>
+                            <div class="col-md-7 text-left">{{ user.profession }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>地址:</span></div>
+                            <div class="col-md-7 text-left">{{ user.address }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 text-right"><span>个人介绍:</span></div>
+                            <div class="col-md-7 text-left">{{ user.aboutme }}</div>
+                        </div>
+                    </div>
+                    <div style="margin-right:100px">
+
+                        {% if user.photo %}
+                            <img src="{{ user.photo | striptags }}" class="img-circle" id="my_photo" width="120px"
+                                 name="user_face">
+                        {% else %}
+                            <img name="user_face" src="{% static 'images/user.jpg' %}" class="img-circle" id="my_photo"
+                                 width="120px">
+                        {% endif %}
+                        <div style="margin-right:3px">
+                            {#                    <a href="{% url 'users:upload_image' %}">#}
+                            <button class="btn btn-primary btn-lg" id="upload_image" onclick="upload_image_layer()">
+                                上传头像
+                            </button>
+                            {#                    </a>#}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <script type="text/javascript" src='{% static "js/jquery-1.11.1.min.js" %}'></script>
+            <script type="text/javascript" src="{% static 'js/layer.js' %}"></script>
+            <script>
+                function upload_image_layer() {
+                    layer.open({
+                        title: "上传头像",
+                        area: ['600px', '550px'],
+                        type: 2,
+                        content: "{% url 'users:upload_image' %}",
+                    });
+                }
+            </script>
+
+        </div>
+        <style>
+            .main {
+                background: #fff;
+                width: 750px;
+                margin: 0 auto;
+                overflow: hidden;
+                padding: 10px;
+            }
+        </style>
+
+    {% endblock %}
+</div>
+

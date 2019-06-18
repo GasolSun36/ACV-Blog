@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}文章详情{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+<div class="main">
+    {% block main %}
+        {% with total_likes=article.users_like.count users_like=article.users_like.all %}
+            <h3 class="page-title">{{ article.title }}</h3>
+            <p class="question-info">
+                <span class="span">博主：
+                    {% if article.author.photo %}
+                        <a href="{% url 'users:others_info' article.author.id %}">
+                        <img src="{{ article.author.photo | striptags }}" class="img-circle" id="my_photo" width="20px"
+                             name="user_face">
+                        </a>
+                    {% else %}
+                        <a href="{% url 'users:others_info' article.author.id %}">
+                        <img name="user_face" src="{% static 'images/user.jpg' %}" class="img-circle" id="my_photo"
+                             width="20px">
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'users:others_info' article.author.id %}">{{ article.author.username }}</a>
+                </span>
+                <span>发表时间:{{ article.created }}</span>
+                <span style="margin-left:20px"
+                      class="glyphicon glyphicon-thumbs-up">{{ total_likes }}like{{ total_likes|pluralize }}</span>
+                {% if article.author.username != user.username %}
+                    <span>
+                    浏览量：{{ article.total_views }}
+                    </span>
+                    {% if a.exists %}
+                        <a href="#" onclick="confirm_collect_cancel()">取消收藏</a>
+                    {% else %}
+                        <a href="#" onclick="confirm_collect()">收藏博客</a>
+                    {% endif %}
+                {% endif %}
+                {% if article.author.username == user.username %}
+                    <a href="#" onclick="confirm_delete()">删除博客</a>
+                {% endif %}
+                {% if article.author.username == user.username %}
+                    <a href="{% url 'article:article_change' article.id %}">修改博客</a>
+                {% endif %}
+            </p>
+            <link rel="stylesheet" href="{% static 'editor/css/editormd.preview.css' %}"/>
+            <div id='editormd-view'>
+        <textarea id="append-test" style="display:none;" class="question-content">
+{{ article.content }}
+        </textarea>
+            </div>
+            <div>
+                <p class="text-center">
+                    <a onclick="like_article({{ article.id }}, 'like')" href="#">
+                        <span class="glyphicon glyphicon-thumbs-up">like</span>
+                    </a>
+                    <a onclick="like_article({{ article.id }}, 'unlike')" href="#">
+                        <span style="margin-left: 15px;" class="glyphicon glyphicon-thumbs-down">unlike</span>
+                    </a>
+                </p>
+            </div>
+            <div>
+                <p class="text-center"><strong>点赞本文的读者</strong></p>
+                {% for user in article.users_like.all %}
+                    <p class="text-center">
+                        {% if article.author.photo %}
+                            <a href="{% url 'users:others_info' user.id %}">
+                                <img src="{{ user.photo | striptags }}" class="img-circle" id="my_photo" width="25px"
+                                     name="user_face">
+                            </a>
+                        {% else %}
+                            <a href="{% url 'users:others_info' user.id %}">
+                                <img name="user_face" src="{% static 'images/user.jpg' %}" class="img-circle"
+                                     id="my_photo" width="25px">
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'users:others_info' user.id %}">{{ user.username }}</a>
+                    </p>
+                {% empty %}
+                    <p class="text-center">还没有人对此文章表态</p>
+                {% endfor %}
+            </div>
+            <h3><span class="glyphicon glyphicon-bullhorn"></span>本文有
+                {{ article.comments.count }}
+                条评论</h3>
+            <div>
+                <ul class="answer-list">
+                    {% for comment in article.comments.all %}
+                        <div class="user-info">
+                            {#                    <img src="{{ url_for('static',filename='') }}"alt="" class="avatar">#}
+                            <span class="username">
+                                {% if comment.commentator.photo %}
+                                    <a href="{% url 'users:others_info' comment.commentator.id %}">
+                                <img src="{{ comment.commentator.photo | striptags }}" class="img-circle" id="my_photo"
+                                     width="40px"
+                                     name="user_face">
+                            </a>
+                                {% else %}
+                                    <a href="{% url 'users:others_info' comment.commentator.id %}">
+                                <img name="user_face" src="{% static 'images/user.jpg' %}" class="img-circle"
+                                     id="my_photo"
+                                     width="40px">
+                            </a>
+                                {% endif %}
+                                <a href="{% url 'users:others_info' comment.commentator.id %}">{{ comment.commentator }}</a>
+                            </span>
+                            <span class="create-time">{{ comment.created }}</span>
+                        </div>
+                        <p class="answer-content">
+                            {{ comment.body }}
+                        </p>
+                        <a href="{% url 'article:comment_report' comment.id %}" style="color:#BBBBBB;float:right">举报</a>
+                        <hr>
+                    {% empty %}
+                        <div class="question-group">
+                            还没有评论哦，快来占沙发吧！
+                        </div>
+                    {% endfor %}
+                </ul>
+
+
+                <form action="." method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea type="text" name="comment" class="form-control" placeholder="请填写评论"></textarea>
+                    </div>
+                    <input type="hidden" name="article_id" value="{{ article.id }}">
+                    <div class="form-group" style="text-align: right">
+                        <button class="btn btn-primary">立即评论</button>
+                    </div>
+                </form>
+                <a href="#" onclick="report_article()">举报</a>
+            </div>
+
+
+
+            <script src='{% static "js/jquery-1.11.1.min.js" %}'></script>
+            <script src='{% static "editor/lib/marked.min.js" %}'></script>
+            <script src='{% static "editor/lib/prettify.min.js" %}'></script>
+            <script src='{% static "editor/lib/raphael.min.js" %}'></script>
+            <script src='{% static "editor/lib/underscore.min.js" %}'></script>
+            <script src='{% static "editor/lib/sequence-diagram.min.js" %}'></script>
+            <script src='{% static "editor/lib/flowchart.min.js" %}'></script>
+            <script src='{% static "editor/lib/jquery.flowchart.min.js" %}'></script>
+            <script src='{% static "editor/editormd.js" %}'></script>
+            <script type="text/javascript" src="{% static 'js/layer.js' %}"></script>
+            <script type="text/javascript">
+                $(function () {
+                    editormd.markdownToHTML("editormd-view", {
+                        htmlDecode: "style, script, iframe",
+                        emoji: true,
+                        taskList: true,
+                        tex: true,
+                        flowChart: true,
+                        sequenceDiagram: true,
+                    });
+                });
+
+                function like_article(id, action) {
+                    $.ajax({
+                        url: "{% url 'article:like_article' %}",
+                        type: "POST",
+                        data: {"id": id, "action": action},
+                        success: function (e) {
+                            if (e == "1") {
+                                layer.msg("感谢点赞", {
+                                    time: 700,
+                                    end: function () {
+                                        window.location.reload();
+                                    }
+
+                                });
+
+                            } else {
+                                layer.msg("我会继续努力", {
+                                    time: 700,
+                                    end: function () {
+                                        window.location.reload();
+                                    }
+
+                                });
+                            }
+                        },
+                    });
+                }
+
+            </script>
+            <script>
+                // 删除文章的函数
+                function confirm_delete() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "确认删除",
+                        // 正文
+                        content: "确认删除这篇博客吗？",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "article:article_delete" article.id %}'
+                        },
+                    })
+                }
+            </script>
+            <script>
+                // 收藏文章的函数
+                function confirm_collect() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "确认收藏",
+                        // 正文
+                        content: "确认收藏这篇博客吗？",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "article:article_collect" article.id %}'
+                        },
+                    })
+                }
+            </script>
+            <script>
+                // 收藏文章的函数
+                function confirm_collect_cancel() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "取消收藏",
+                        // 正文
+                        content: "确认取消收藏这篇博客吗？",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "article:article_collect_cancel" article.id %}'
+                        },
+                    })
+                }
+            </script>
+            <script>
+                // 举报博客的函数
+                function report_article() {
+                    // 调用layer弹窗组件
+                    layer.open({
+                        // 弹窗标题
+                        title: "举报博客",
+                        // 正文
+                        content: "确认举报这篇博客吗？举报属实会有奖励，但举报若不属实则会有惩罚",
+                        // 点击确定按钮后调用的回调函数
+                        yes: function (index, layero) {
+                            // 指定应当前往的 url
+                            location.href = '{% url "article:article_report" article.id %}'
+                        },
+                    })
+                }
+            </script>
+
+
+            <style>
+                .main {
+                    background: #fff;
+                    width: 750px;
+                    margin: 0 auto;
+                    overflow: hidden;
+                    padding: 10px;
+                }
+
+                .page-title {
+                    text-align: center;
+                    font-weight: 800;
+                }
+
+                .question-info {
+                    text-align: center;
+                    margin-top: 20px;
+
+                }
+
+                .question-content {
+                    margin-left: 10px;
+                }
+
+                .span {
+                    margin-right: 10px;
+                }
+
+                .form-control {
+                    width: 650px;
+                }
+
+                .form-group {
+                    margin-left: 10px;
+                }
+
+                .font-control {
+                    margin-left: 10px;
+                }
+
+                .form-group {
+                    margin-right: 48px;
+                }
+
+                .line-control {
+                    line-height: 300%;
+                }
+
+                .answer-list li {
+                    list-style: none;
+                    border-bottom: 1px solid #eee;
+                    padding-top: 10px;
+                }
+
+                .answer-list {
+                    padding-left: 0;
+                }
+
+                .user-info {
+                    font-size: 16px;
+                    color: #9b9b9b;
+                    line-height: 40px;
+                }
+
+                .user-info .username {
+                    margin-left: 20px;
+                }
+
+                .user-info .create-time {
+                    float: right;
+                }
+
+                .answer-content {
+                    margin-left: 60px;
+                    font-size: 20px;
+                }
+            </style>
+        {% endwith %}
+    {% endblock %}
+</div>
+

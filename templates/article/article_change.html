@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}修改博客{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{% static 'editor/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'editor/css/editormd.css' %}">
+{% endblock %}
+
+<div class="main">
+    {% block main %}
+        <h3 class="page-title">发表博客</h3>
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="form-container">
+                <div class="form-group">
+                    <p class="position_title">标题：</p>
+                    <input id="id_title" class="form-control" type="text" placeholder=""
+                           name="title" value="{{ article.title }}">
+                </div>
+                <div id="editormd" class="col-md-10 text-left">
+                    <p class="position_content">内容</p>
+                    <textarea name="content" style="display:none;">{{ article.content }}</textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">提交修改</button>
+                </div>
+            </div>
+        </form>
+        <style>
+            .form-container {
+                width: 800px;
+                margin: 0 auto;
+                text-align: right;
+            }
+
+            .position_title {
+                text-align: left;
+            }
+
+            .position_content {
+                text-align: left;
+            }
+
+            .page-title {
+                text-align: center;
+            }
+
+            body {
+                background: #E6E6E6;
+            }
+
+            .main {
+                background: #fff;
+                width: 1000px;
+                margin: 0 auto;
+                overflow: hidden;
+                padding: 10px;
+            }
+
+
+        </style>
+
+        <script type="text/javascript" src='{% static "js/jquery-1.11.1.min.js" %}'></script>
+        <script type="text/javascript" src="{% static 'js/layer.js' %}"></script>
+        <script>
+            // 删除文章的函数
+            function confirm_change() {
+                // 调用layer弹窗组件
+                layer.open({
+                    // 弹窗标题
+                    title: "确认提交",
+                    // 正文
+                    content: "确认提交你的修改吗？",
+                    // 点击确定按钮后调用的回调函数
+                    yes: function (index, layero) {
+                        // 指定应当前往的 url
+                        location.href = '{% url "article:article_detail" article.id %}'
+                    },
+                })
+            }
+        </script>
+        <script type="text/javascript" src='{% static "editor/editormd.min.js" %}'></script>
+        <script type="text/javascript">
+            $(function () {
+                var editor = editormd("editormd", {
+                    width: "100%",
+                    height: 640,
+                    syncScrolling: "single",
+                    path: "{% static 'editor/lib/' %}"
+                });
+            });
+        </script>
+    {% endblock %}
+</div>
+
+
+
